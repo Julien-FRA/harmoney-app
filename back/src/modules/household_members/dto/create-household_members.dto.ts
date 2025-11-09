@@ -1,12 +1,15 @@
-import { IsString } from 'class-validator';
+import { IsString, IsUUID, IsIn } from 'class-validator';
 
 export class CreateHouseholdMembersDto {
   @IsString({ message: 'Le rôle du membre du foyer est requis.' })
+  @IsIn(['admin', 'member'], {
+    message: 'Le rôle doit être "admin" ou "member"',
+  })
   role: string;
 
-  @IsString({ message: "L'ID du user est requis." })
+  @IsUUID('4', { message: "L'ID utilisateur doit être un UUID valide" })
   userId: string;
 
-  @IsString({ message: "L'ID du foyer est requis." })
+  @IsUUID('4', { message: "L'ID du foyer doit être un UUID valide" })
   householdId: string;
 }
