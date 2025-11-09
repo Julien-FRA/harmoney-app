@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { ExpensesService } from 'src/modules/expenses/services/expenses.service';
 import { UsersService } from 'src/modules/users/services/users.service';
 import { ExpensesSharesRepository } from '../repository/expenses_shares.repository';
@@ -17,18 +21,24 @@ export class ExpensesSharesService {
     await this.verifyExistingExpensesAndUsers(expenseId, userId);
 
     if (!expenseShareData.amount) {
-      throw new Error('Amount is required');
+      throw new BadRequestException('Le montant est requis');
     }
 
     if (expenseShareData.amount <= 0) {
-      throw new Error('Amount must be greater than zero');
+      throw new BadRequestException('Le montant doit être supérieur à zéro');
     }
 
     return this.expensesSharesRepository.createExpenseShare(expenseShareData);
   }
 
   async findById(id: string) {
-    return this.expensesSharesRepository.findById(id);
+    const expenseShare = await this.expensesSharesRepository.findById(id);
+    if (!expenseShare) {
+      throw new NotFoundException(
+        `Partage de dépense avec l'ID ${id} non trouvé`,
+      );
+    }
+    return expenseShare;
   }
 
   async findAll() {
@@ -40,17 +50,25 @@ export class ExpensesSharesService {
     userId: string,
   ) {
     if (!expenseId || !userId) {
-      throw new Error('Expense ID and User ID are required');
+      throw new BadRequestException(
+        "L'ID de la dépense et l'ID utilisateur sont requis",
+      );
     }
 
-    const expense = await this.expensesService.findById(expenseId);
-    if (!expense) {
-      throw new Error(`Expense with ID ${expenseId} does not exist`);
+    try {
+      await this.expensesService.findById(expenseId);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(
+          `Dépense avec l'ID ${expenseId} non trouvée`,
+        );
+      }
+      throw error;
     }
 
     const user = await this.usersSerivce.findById(userId);
     if (!user) {
-      throw new Error(`User with ID ${userId} does not exist`);
+      throw new NotFoundException(`Utilisateur avec l'ID ${userId} non trouvé`);
     }
   }
 }

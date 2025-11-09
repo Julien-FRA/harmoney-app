@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { HouseholdMembersRepository } from '../repository/household_members.repository';
 import { CreateHouseholdMembersDto } from '../dto/create-household_members.dto';
 import { UsersService } from 'src/modules/users/services/users.service';
@@ -22,7 +26,13 @@ export class HouseholdMembersService {
   }
 
   async findById(id: string) {
-    return this.householdMembersRepository.findById(id);
+    const member = await this.householdMembersRepository.findById(id);
+    if (!member) {
+      throw new NotFoundException(
+        `Membre de foyer avec l'ID ${id} non trouvé`,
+      );
+    }
+    return member;
   }
 
   async findAll() {
@@ -31,7 +41,7 @@ export class HouseholdMembersService {
 
   async findByHouseholdId(householdId: string) {
     if (!householdId) {
-      throw new Error('Household ID is required');
+      throw new BadRequestException("L'ID du foyer est requis");
     }
 
     return this.householdMembersRepository.findByHouseholdId(householdId);
@@ -42,17 +52,21 @@ export class HouseholdMembersService {
     householdId: string,
   ) {
     if (!userId || !householdId) {
-      throw new Error('User ID and Household ID are required');
+      throw new BadRequestException(
+        "L'ID utilisateur et l'ID du foyer sont requis",
+      );
     }
 
     const existingUser = await this.usersService.findById(userId);
     if (!existingUser) {
-      throw new Error(`User with ID ${userId} does not exist`);
+      throw new NotFoundException(`Utilisateur avec l'ID ${userId} non trouvé`);
     }
 
     const existingHousehold = await this.householdService.findById(householdId);
     if (!existingHousehold) {
-      throw new Error(`Household with ID ${householdId} does not exist`);
+      throw new NotFoundException(
+        `Foyer avec l'ID ${householdId} non trouvé`,
+      );
     }
   }
 }
