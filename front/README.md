@@ -50,7 +50,6 @@ Ce projet suit des règles strictes pour garantir un code de qualité :
 - ✅ **Husky** : Hooks Git pour la qualité du code
 - ✅ **Atomic Design** : Architecture modulaire
 
-Consultez [DEVELOPMENT.md](./DEVELOPMENT.md) pour plus de détails.
 
 ## 🛠️ Technologies
 

@@ -12,11 +12,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { HouseholdMembersModule } from './modules/household_members/household_members.module';
 import { ExpensesModule } from './modules/expenses/expenses.module';
 import { ExpensesSharesModule } from './modules/expenses_shares/expenses_shares.module';
+import { validate } from './config/env.validation';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      validate,
     }),
     PrismaModule,
     AuthModule,
